@@ -143,13 +143,24 @@ function status(msg, err){ const s = $("status"); s.textContent = msg || ""; s.c
 // ---------- Gemini ----------
 async function gemini(model, body){
   if (!S.key) { $("settings").open = true; throw new Error("Эхлээд Тохиргоо дээр API түлхүүрээ оруулна уу"); }
-  const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "x-goog-api-key": S.key },
-    body: JSON.stringify(body)
-  });
+  const ac = new AbortController();
+  const base = $("status").textContent.replace(/ \(\d+ сек\)$/, "");
+  let sec = 0;
+  const tick = setInterval(() => { sec++; $("status").textContent = `${base} (${sec} сек)`; }, 1000);
+  const to = setTimeout(() => ac.abort(), 60000);
+  let r;
+  try {
+    r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": S.key },
+      body: JSON.stringify(body),
+      signal: ac.signal
+    });
+  } catch (e) {
+    throw new Error(e.name === "AbortError" ? `60 секунд хүлээгээд хариу ирсэнгүй (модель: ${model})` : "Сүлжээний алдаа: " + e.message);
+  } finally { clearInterval(tick); clearTimeout(to); }
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error((j.error && j.error.message) || ("HTTP " + r.status));
+  if (!r.ok) throw new Error(`[${model}] ` + ((j.error && j.error.message) || ("HTTP " + r.status)));
   const parts = j.candidates?.[0]?.content?.parts || [];
   if (!parts.length) throw new Error("Хоосон хариу ирлээ");
   return parts;
@@ -261,7 +272,7 @@ async function onRecStop(){
   $("mic").classList.remove("rec"); $("mic").textContent = "🎤"; $("micHint").textContent = "Дарж ярина, дуусаад дахин дарна";
   busy = true;
   try {
-    status("⏳ Яриаг текст болгож байна...");
+    status("⏳ Бичлэгийг бэлдэж байна...");
     const blob = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
     const ctx = new (window.AudioContext || window.webkitAudioContext)();
     const buf = await ctx.decodeAudioData(await blob.arrayBuffer());
@@ -271,6 +282,7 @@ async function onRecStop(){
     const src = off.createBufferSource(); src.buffer = buf; src.connect(off.destination); src.start();
     const res = await off.startRendering();
     const wav = wavFromInt16(floatToInt16(res.getChannelData(0)), 16000);
+    status("⏳ Яриаг текст болгож байна...");
     const text = await transcribe(bytesToB64(wav));
     if (!text) throw new Error("Яриа танигдсангүй, дахин оролдоно уу");
     const box = $("mn");
