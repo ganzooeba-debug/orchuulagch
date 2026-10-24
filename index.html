@@ -3,91 +3,148 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
+<meta name="theme-color" content="#0b1020">
 <title>Дуу Орчуулагч</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
 <style>
-:root{--bg:#0f172a;--card:#1e293b;--line:#334155;--text:#e2e8f0;--muted:#94a3b8;--accent:#f97316;--ok:#22c55e;--err:#ef4444}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:16px 16px calc(24px + env(safe-area-inset-bottom))}
-.wrap{max-width:560px;margin:0 auto}
-h1{font-size:20px;margin:4px 0 14px;display:flex;align-items:center;gap:8px}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-label.t{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
-textarea,input,select{width:100%;background:#0b1222;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
-textarea{min-height:90px;resize:vertical}
-.row{display:flex;gap:8px}
-.row>*{flex:1}
-.seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg button{flex:1;min-width:70px}
-button{background:#334155;color:var(--text);border:0;border-radius:10px;padding:12px 10px;font:inherit;font-weight:600;cursor:pointer}
-button.on{background:var(--accent);color:#111}
-button.primary{background:var(--accent);color:#111;width:100%}
+:root{
+  --bg:#0b1020;--card:rgba(255,255,255,.055);--card-line:rgba(255,255,255,.09);
+  --field:rgba(5,9,22,.55);--text:#eef1fb;--muted:#9aa3c0;
+  --a1:#22d3ee;--a2:#8b5cf6;--grad:linear-gradient(135deg,var(--a1),var(--a2));
+  --rec1:#fb7185;--rec2:#f43f5e;--err:#fda4af;--ok:#6ee7b7
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%}
+body{margin:0;color:var(--text);font:16px/1.5 Manrope,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:
+    radial-gradient(600px 420px at 0% -5%,rgba(34,211,238,.20),transparent 60%),
+    radial-gradient(560px 420px at 100% 10%,rgba(139,92,246,.24),transparent 60%),
+    radial-gradient(500px 400px at 50% 110%,rgba(56,189,248,.10),transparent 60%),
+    var(--bg);
+  background-attachment:fixed;
+  padding:18px 16px calc(28px + env(safe-area-inset-bottom))}
+.wrap{max-width:540px;margin:0 auto}
+header{display:flex;align-items:center;gap:12px;margin:6px 2px 18px}
+.logo{width:44px;height:44px;border-radius:14px;background:var(--grad);display:grid;place-items:center;box-shadow:0 8px 24px rgba(139,92,246,.35)}
+.logo svg{width:24px;height:24px;color:#fff}
+h1{font-size:21px;font-weight:800;margin:0;letter-spacing:-.01em}
+.sub{margin:0;font-size:13px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--card-line);border-radius:22px;padding:16px;margin-bottom:14px;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
+label.t{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 2px}
+.gap{margin-top:14px}
+textarea,input{width:100%;background:var(--field);color:var(--text);border:1px solid var(--card-line);border-radius:14px;padding:12px 14px;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
+textarea:focus,input:focus{border-color:rgba(34,211,238,.6);box-shadow:0 0 0 3px rgba(34,211,238,.15)}
+textarea{min-height:96px;resize:vertical}
+textarea::placeholder,input::placeholder{color:#6b7493}
+.row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
+.seg{display:flex;gap:4px;padding:4px;background:var(--field);border:1px solid var(--card-line);border-radius:14px}
+.seg button{flex:1;min-width:0;padding:10px 6px;border-radius:10px;background:transparent;color:var(--muted);font-weight:700}
+.seg button.on{background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(139,92,246,.35)}
+button{border:0;font:inherit;font-weight:700;cursor:pointer;color:var(--text);transition:transform .12s,opacity .2s,background .2s}
+button:active{transform:scale(.97)}
 button:disabled{opacity:.5}
-#mic{width:120px;height:120px;border-radius:50%;margin:6px auto 10px;display:block;font-size:44px;background:var(--accent);color:#111;box-shadow:0 0 0 0 rgba(249,115,22,.6)}
-#mic.rec{background:var(--err);animation:pulse 1.2s infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 22px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
-.hint{text-align:center;color:var(--muted);font-size:13px;margin:0}
-#status{white-space:pre-wrap;min-height:22px;font-size:14px;color:var(--muted);text-align:center;margin:8px 0}
-#status.err{color:var(--err)}
-.back{font-size:14px;color:var(--muted);margin-top:8px;white-space:pre-wrap}
-audio{width:100%;margin:10px 0}
-.actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 12px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid var(--card-line)}
+.btn svg{width:18px;height:18px;flex:none}
+.btn.primary{background:var(--grad);border:0;color:#fff;box-shadow:0 8px 22px rgba(139,92,246,.35)}
+.btn.full{width:100%}
+.mic-zone{display:flex;flex-direction:column;align-items:center;padding:10px 0 4px}
+#mic{position:relative;width:128px;height:128px;border-radius:50%;background:var(--grad);display:grid;place-items:center;
+  box-shadow:0 0 0 10px rgba(139,92,246,.12),0 0 0 22px rgba(34,211,238,.06),0 16px 40px rgba(139,92,246,.45)}
+#mic svg{width:48px;height:48px;color:#fff}
+#mic .i-stop{display:none}
+#mic.rec{background:linear-gradient(135deg,var(--rec1),var(--rec2));box-shadow:0 16px 40px rgba(244,63,94,.45)}
+#mic.rec .i-mic{display:none}#mic.rec .i-stop{display:block}
+#mic.rec::before,#mic.rec::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(251,113,133,.6);animation:ring 1.6s ease-out infinite}
+#mic.rec::after{animation-delay:.8s}
+@keyframes ring{from{transform:scale(1);opacity:.9}to{transform:scale(1.6);opacity:0}}
+.hint{text-align:center;color:var(--muted);font-size:13px;margin:26px 0 0}
+#status{white-space:pre-wrap;min-height:20px;font-size:13.5px;color:var(--muted);text-align:center;margin:10px 0 14px}
+#status.err{color:var(--err);background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.25);border-radius:12px;padding:10px;text-align:left}
+#status:empty{margin:6px 0}
+.out-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.badge{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--grad);color:#fff}
+.back{font-size:14px;color:var(--muted);margin-top:10px;padding:10px 12px;border-left:3px solid var(--a1);background:rgba(34,211,238,.06);border-radius:0 10px 10px 0;white-space:pre-wrap}
+.back:empty{display:none}
+audio{width:100%;margin:12px 0;height:44px}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .actions .wide{grid-column:1/-1}
-details summary{cursor:pointer;color:var(--muted);font-size:14px}
-details .f{margin-top:10px}
-a{color:var(--accent)}
+details summary{cursor:pointer;color:var(--muted);font-weight:700;list-style:none;display:flex;align-items:center;gap:8px}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"›";margin-left:auto;font-size:20px;transition:transform .2s}
+details[open] summary::after{transform:rotate(90deg)}
+details .f{margin-top:12px}
+a{color:var(--a1)}
+.small{font-size:12.5px;color:var(--muted);text-align:center;margin:10px 0 0}
 .hidden{display:none}
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4M8 21h8"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="3"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+</svg>
 <div class="wrap">
-  <h1>🎙 Дуу Орчуулагч</h1>
+  <header>
+    <div class="logo"><svg><use href="#i-globe"/></svg></div>
+    <div><h1>Дуу Орчуулагч</h1><p class="sub">Монголоор ярь — хэлээр нь хүргэе</p></div>
+  </header>
 
   <div class="card">
     <label class="t">Хэл</label>
     <div class="seg" id="langs"></div>
-    <label class="t" style="margin-top:10px">Хэв маяг</label>
-    <div class="seg" id="styles"></div>
-    <label class="t" style="margin-top:10px">Хоолой</label>
-    <div class="seg" id="voices"></div>
+    <div class="row gap">
+      <div><label class="t">Хэв маяг</label><div class="seg" id="styles"></div></div>
+    </div>
+    <div class="gap"><label class="t">Хоолой</label><div class="seg" id="voices"></div></div>
   </div>
 
   <div class="card">
-    <button id="mic" aria-label="Бичих">🎤</button>
-    <p class="hint" id="micHint">Дарж ярина, дуусаад дахин дарна</p>
+    <div class="mic-zone">
+      <button id="mic" aria-label="Бичих"><svg class="i-mic"><use href="#i-mic"/></svg><svg class="i-stop"><use href="#i-stop"/></svg></button>
+      <p class="hint" id="micHint">Дарж ярина, дуусаад дахин дарна</p>
+    </div>
     <div id="status"></div>
-    <label class="t">Монгол текст (засаж болно, эсвэл шууд бичиж болно)</label>
-    <textarea id="mn" placeholder="Энд таны хэлсэн үг гарна..."></textarea>
-    <button class="primary" id="go" style="margin-top:10px">Орчуулах + Хоолой болгох</button>
+    <label class="t">Монгол текст</label>
+    <textarea id="mn" placeholder="Энд таны хэлсэн үг гарна... Засаж эсвэл шууд бичиж болно"></textarea>
+    <button class="btn primary full gap" id="go"><svg><use href="#i-globe"/></svg>Орчуулах + Хоолой болгох</button>
   </div>
 
   <div class="card hidden" id="out">
-    <label class="t" id="outLabel">Орчуулга</label>
+    <div class="out-head"><label class="t" style="margin:0">Орчуулга</label><span class="badge" id="outLabel">—</span></div>
     <textarea id="tr"></textarea>
     <div class="back" id="back"></div>
     <audio id="player" controls></audio>
     <div class="actions">
-      <button class="primary wide" id="shareAudio">📤 Аудио илгээх</button>
-      <button id="shareText">💬 Текст илгээх</button>
-      <button id="copy">📋 Хуулах</button>
-      <button id="retts" class="wide">🔁 Засварласан текстээр дахин хоолой</button>
+      <button class="btn primary wide" id="shareAudio"><svg><use href="#i-send"/></svg>Аудио илгээх</button>
+      <button class="btn" id="shareText"><svg><use href="#i-chat"/></svg>Текст илгээх</button>
+      <button class="btn" id="copy"><svg><use href="#i-copy"/></svg>Хуулах</button>
+      <button class="btn wide" id="retts"><svg><use href="#i-redo"/></svg>Засварласан текстээр дахин хоолой</button>
     </div>
   </div>
 
   <div class="card">
     <details id="settings">
-      <summary>⚙️ Тохиргоо</summary>
+      <summary><svg style="width:18px;height:18px"><use href="#i-gear"/></svg>Тохиргоо</summary>
       <div class="f">
-        <label class="t">Gemini API түлхүүр — <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">энд авна</a></label>
+        <label class="t">Gemini API түлхүүр · <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">энд авна</a></label>
         <input id="key" type="password" placeholder="AIza..." autocomplete="off">
       </div>
       <div class="f row">
         <div><label class="t">Текстийн модель</label><input id="mText"></div>
         <div><label class="t">Хоолойн модель</label><input id="mTts"></div>
       </div>
-      <button class="primary f" id="save">Хадгалах</button>
-      <p class="hint f">Түлхүүр зөвхөн энэ утсан дээр хадгалагдана.</p>
+      <button class="btn primary full f" id="save">Хадгалах</button>
+      <p class="small">Түлхүүр зөвхөн энэ утсан дээр хадгалагдана. Модель ажиллахгүй бол апп өөрөө дараагийнх руу шилжинэ.</p>
     </details>
   </div>
 </div>
@@ -291,13 +348,13 @@ $("mic").onclick = async () => {
   rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
   rec.onstop = onRecStop;
   rec.start();
-  $("mic").classList.add("rec"); $("mic").textContent = "⏹"; $("micHint").textContent = "Сонсож байна... дуусаад дарна";
+  $("mic").classList.add("rec"); $("micHint").textContent = "Сонсож байна... дуусаад дарна";
   status("");
 };
 
 async function onRecStop(){
   stream.getTracks().forEach(t => t.stop());
-  $("mic").classList.remove("rec"); $("mic").textContent = "🎤"; $("micHint").textContent = "Дарж ярина, дуусаад дахин дарна";
+  $("mic").classList.remove("rec"); $("micHint").textContent = "Дарж ярина, дуусаад дахин дарна";
   busy = true;
   try {
     status("⏳ Бичлэгийг бэлдэж байна...");
@@ -343,9 +400,9 @@ $("go").onclick = async () => {
     status("⏳ Орчуулж байна...");
     const { tr, back } = await translate(mn);
     $("out").classList.remove("hidden");
-    $("outLabel").textContent = "Орчуулга — " + LANGS[S.lang].mn;
+    $("outLabel").textContent = LANGS[S.lang].mn;
     $("tr").value = tr;
-    $("back").textContent = back ? "Утга нь (монголоор): " + back : "";
+    $("back").textContent = back ? "Утга нь: " + back : "";
     await makeVoice(tr);
     $("out").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (e) { status(e.message, true); }
