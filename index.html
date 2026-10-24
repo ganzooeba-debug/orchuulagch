@@ -79,7 +79,17 @@ details[open] summary::after{transform:rotate(90deg)}
 details .f{margin-top:12px}
 a{color:#fff}
 .small{font-size:12.5px;color:var(--muted);text-align:center;margin:10px 0 0}
-.hidden{display:none}
+.hidden{display:none !important}
+.modes{margin:0 0 14px}
+body[data-mode="speak"] .m-in{display:none}
+body[data-mode="in"] .m-speak{display:none}
+.orig{font-size:15px;padding:12px 14px;border-radius:14px;background:var(--field);border:1px solid var(--card-line);white-space:pre-wrap;min-height:44px}
+#inStatus{white-space:pre-wrap;font-size:13.5px;color:var(--muted);text-align:center;margin:12px 0 0}
+#inStatus.err{color:var(--err);background:rgba(255,80,80,.07);border:1px solid rgba(255,120,120,.25);border-radius:12px;padding:10px;text-align:left}
+#inStatus:empty{display:none}
+#inMic.rec{background:#fff;color:#000;box-shadow:var(--glow)}
+.help{font-size:13px;color:var(--muted);margin:0 0 12px;line-height:1.55}
+.help b{color:#fff}
 @media (prefers-reduced-motion:reduce){#mic{animation:none}}
 </style>
 </head>
@@ -94,6 +104,9 @@ a{color:#fff}
   <symbol id="i-redo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></symbol>
   <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></symbol>
   <symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4V5zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></symbol>
+  <symbol id="i-reply" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17 4 12l5-5"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></symbol>
 </svg>
 <div class="wrap">
   <header>
@@ -101,7 +114,9 @@ a{color:#fff}
     <div><h1>Дуу Орчуулагч</h1><p class="sub">Монголоор ярь — хэлээр нь хүргэе</p></div>
   </header>
 
-  <div class="card">
+  <div class="seg modes" id="modes"></div>
+
+  <div class="card m-speak">
     <label class="t">Хэл</label>
     <div class="seg" id="langs"></div>
     <div class="row gap">
@@ -110,7 +125,7 @@ a{color:#fff}
     <div class="gap"><label class="t">Хоолой</label><div class="seg" id="voices"></div></div>
   </div>
 
-  <div class="card">
+  <div class="card m-speak">
     <div class="mic-zone">
       <button id="mic" aria-label="Бичих"><svg class="i-mic"><use href="#i-mic"/></svg><svg class="i-stop"><use href="#i-stop"/></svg></button>
       <p class="hint" id="micHint">Дарж ярина, дуусаад дахин дарна</p>
@@ -121,7 +136,7 @@ a{color:#fff}
     <button class="btn primary full gap" id="go"><svg><use href="#i-globe"/></svg>Орчуулах + Хоолой болгох</button>
   </div>
 
-  <div class="card hidden" id="out">
+  <div class="card hidden m-speak" id="out">
     <div class="out-head"><label class="t" style="margin:0">Орчуулга</label><span class="badge" id="outLabel">—</span></div>
     <textarea id="tr" spellcheck="false" autocorrect="off" autocomplete="off"></textarea>
     <div class="back" id="back"></div>
@@ -131,6 +146,33 @@ a{color:#fff}
       <button class="btn" id="shareText"><svg><use href="#i-chat"/></svg>Текст илгээх</button>
       <button class="btn" id="copy"><svg><use href="#i-copy"/></svg>Хуулах</button>
       <button class="btn wide" id="retts"><svg><use href="#i-redo"/></svg>Засварласан текстээр дахин хоолой</button>
+    </div>
+  </div>
+
+  <div class="card m-in">
+    <label class="t">Ирсэн мессеж</label>
+    <p class="help">Telegram, WhatsApp, Viber дээр дуут эсвэл бичгэн мессежийг удаан дараад <b>Share → Дуу Орчуулагч</b> сонгоно. WeChat-ийн дууг чанга яригчаар тоглуулж бичүүлнэ, текстийг хуулж доор буулгана.</p>
+    <div class="actions">
+      <button class="btn primary wide" id="inPick"><svg><use href="#i-file"/></svg>Дууны файл сонгох</button>
+      <button class="btn wide" id="inMic"><svg><use href="#i-mic"/></svg><span id="inMicTxt">Чанга яригчаар тоглуулж бичих</span></button>
+    </div>
+    <label class="t gap">Ирсэн текст</label>
+    <textarea id="inText" spellcheck="false" autocorrect="off" autocomplete="off" placeholder="Хятад, орос, англи текстээ энд буулгана..."></textarea>
+    <button class="btn full gap" id="inTextGo"><svg><use href="#i-globe"/></svg>Монгол руу орчуулах</button>
+    <input type="file" id="inFile" accept="audio/*,.ogg,.opus,.oga,.m4a,.mp3,.aac,.amr,.wav" hidden>
+    <div id="inStatus"></div>
+  </div>
+
+  <div class="card hidden m-in" id="inOut">
+    <div class="out-head"><label class="t" style="margin:0">Эх бичвэр</label><span class="badge" id="inLang">—</span></div>
+    <div class="orig" id="inOrig"></div>
+    <label class="t gap">Монгол орчуулга</label>
+    <textarea id="inMn" spellcheck="false" autocorrect="off" autocomplete="off"></textarea>
+    <audio id="inPlayer" class="hidden" controls></audio>
+    <div class="actions gap">
+      <button class="btn primary wide" id="inSpeak"><svg><use href="#i-play"/></svg>Монголоор сонсох</button>
+      <button class="btn" id="inCopy"><svg><use href="#i-copy"/></svg>Хуулах</button>
+      <button class="btn" id="reply"><svg><use href="#i-reply"/></svg>Хариу хэлэх</button>
     </div>
   </div>
 
@@ -200,6 +242,7 @@ $("save").onclick = () => {
 function status(msg, err){ const s = $("status"); s.textContent = msg || ""; s.className = err ? "err" : ""; }
 
 // ---------- Gemini ----------
+let stEl = "status";
 const TEXT_MODELS = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
 const TTS_MODELS = ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts", "gemini-3.1-flash-tts-preview"];
 const good = {};
@@ -223,9 +266,9 @@ async function geminiAuto(kind, body){
 async function gemini(model, body){
   if (!S.key) { $("settings").open = true; throw new Error("Эхлээд Тохиргоо дээр API түлхүүрээ оруулна уу"); }
   const ac = new AbortController();
-  const base = $("status").textContent.replace(/ \[.*$/, "");
+  const base = $(stEl).textContent.replace(/ \[.*$/, "");
   let sec = 0;
-  const tick = setInterval(() => { sec++; $("status").textContent = `${base} [${model}, ${sec} сек]`; }, 1000);
+  const tick = setInterval(() => { sec++; $(stEl).textContent = `${base} [${model}, ${sec} сек]`; }, 1000);
   const to = setTimeout(() => ac.abort(), 40000);
   let r;
   try {
@@ -456,6 +499,146 @@ $("shareText").onclick = async () => {
 $("copy").onclick = async () => {
   try { await navigator.clipboard.writeText($("tr").value.trim()); status("Хууллаа ✓"); } catch { status("Хуулж чадсангүй", true); }
 };
+
+// ---------- Ирсэн дуу орчуулах ----------
+const MODES = { speak: "Би ярих", in: "Ирсэн дуу" };
+S.mode = store.get("mode", "speak");
+function renderModes(){
+  const box = $("modes"); box.innerHTML = "";
+  for (const [k, v] of Object.entries(MODES)){
+    const b = document.createElement("button");
+    b.textContent = v; b.className = S.mode === k ? "on" : "";
+    b.onclick = () => { S.mode = k; store.set("mode", k); renderModes(); };
+    box.appendChild(b);
+  }
+  document.body.dataset.mode = S.mode;
+}
+renderModes();
+
+function inStatus(msg, err){ const s = $("inStatus"); s.textContent = msg || ""; s.className = err ? "err" : ""; }
+function guessMime(f){
+  const n = (f.name || "").toLowerCase();
+  if (/\.(ogg|oga|opus)$/.test(n)) return "audio/ogg";
+  if (/\.(m4a|aac|mp4)$/.test(n)) return "audio/aac";
+  if (/\.mp3$/.test(n)) return "audio/mp3";
+  if (/\.wav$/.test(n)) return "audio/wav";
+  return f.type || "audio/ogg";
+}
+async function toWav16(blob){
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  try {
+    const buf = await ctx.decodeAudioData(await blob.arrayBuffer());
+    const off = new OfflineAudioContext(1, Math.ceil(buf.duration * 16000), 16000);
+    const src = off.createBufferSource(); src.buffer = buf; src.connect(off.destination); src.start();
+    const res = await off.startRendering();
+    return { data: bytesToB64(wavFromInt16(floatToInt16(res.getChannelData(0)), 16000)), mime: "audio/wav" };
+  } finally { ctx.close(); }
+}
+
+let inBusy = false, lastInLang = null;
+async function handleIncoming(input){
+  if (inBusy) return; inBusy = true; stEl = "inStatus";
+  $("inOut").classList.add("hidden"); $("inPlayer").classList.add("hidden");
+  try {
+    const isText = typeof input === "string";
+    let first;
+    if (isText) first = { text: "Received text message:\n" + input };
+    else {
+      inStatus("⏳ Дууг бэлдэж байна...");
+      let audio;
+      try { audio = await toWav16(input); }
+      catch { audio = { data: bytesToB64(await input.arrayBuffer()), mime: guessMime(input) }; }
+      first = { inlineData: { mimeType: audio.mime, data: audio.data } };
+    }
+    inStatus(isText ? "⏳ Орчуулж байна..." : "⏳ Сонсож, орчуулж байна...");
+    const what = isText ? "a text message" : "a voice message";
+    const parts = await geminiAuto("text", {
+      contents: [{ parts: [
+        first,
+        { text: CONTEXT + `
+This is ${what} the Mongolian man received from someone (often Chinese, Russian or English speaking). Detect the language, give the original exactly in its original language and script${isText ? "" : " (transcribe the speech)"}, then translate it into natural, clear Mongolian (Cyrillic). Keep technical terms, numbers and model names accurate.
+Return JSON: {"lang": "zh|ru|en|other", "lang_name_mn": "language name in Mongolian", "original": "...", "mongolian": "..."}. If there is no content, return empty strings.` }
+      ]}],
+      generationConfig: { responseMimeType: "application/json" }
+    });
+    const raw = textOf(parts); let o;
+    try { o = JSON.parse(raw); } catch { o = { mongolian: raw }; }
+    if (!o.mongolian && !o.original) throw new Error("Яриа танигдсангүй");
+    lastInLang = LANGS[o.lang] ? o.lang : null;
+    $("inLang").textContent = lastInLang ? LANGS[lastInLang].mn : (o.lang_name_mn || "Бусад");
+    $("inOrig").textContent = o.original || "";
+    $("inMn").value = o.mongolian || "";
+    $("reply").disabled = !lastInLang;
+    $("inOut").classList.remove("hidden");
+    inStatus("✓ Орчууллаа");
+    $("inOut").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) { inStatus(e.message, true); }
+  inBusy = false; stEl = "status";
+}
+
+$("inPick").onclick = () => $("inFile").click();
+$("inTextGo").onclick = () => { const t = $("inText").value.trim(); if (t) handleIncoming(t); else inStatus("Эхлээд текстээ буулгана уу", true); };
+$("inFile").onchange = e => { const f = e.target.files[0]; if (f) handleIncoming(f); e.target.value = ""; };
+
+let inRec = null, inStream = null, inChunks = [];
+$("inMic").onclick = async () => {
+  if (inBusy) return;
+  if (inRec && inRec.state === "recording"){ inRec.stop(); return; }
+  try { inStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch (e) { inStatus("Микрофон нээгдсэнгүй (" + e.name + ")", true); return; }
+  inChunks = []; inRec = new MediaRecorder(inStream);
+  inRec.ondataavailable = e => { if (e.data.size) inChunks.push(e.data); };
+  inRec.onstop = () => {
+    inStream.getTracks().forEach(t => t.stop());
+    $("inMic").classList.remove("rec"); $("inMicTxt").textContent = "Чанга яригчаар тоглуулж бичих";
+    handleIncoming(new Blob(inChunks, { type: inRec.mimeType || "audio/webm" }));
+  };
+  inRec.start(); $("inMic").classList.add("rec"); $("inMicTxt").textContent = "Бичиж байна... дуусаад дарна"; inStatus("");
+};
+
+$("inSpeak").onclick = async () => {
+  const t = $("inMn").value.trim(); if (!t || inBusy) return;
+  inBusy = true; stEl = "inStatus";
+  try {
+    inStatus("⏳ Монгол хоолой үүсгэж байна...");
+    const { pcm, rate } = await tts(t);
+    const p = $("inPlayer"); if (p.src) URL.revokeObjectURL(p.src);
+    p.src = URL.createObjectURL(new Blob([wavFromInt16(pcm, rate)], { type: "audio/wav" }));
+    p.classList.remove("hidden"); p.play().catch(() => {});
+    inStatus("");
+  } catch (e) { inStatus("Монгол хоолой гаргаж чадсангүй: " + e.message, true); }
+  inBusy = false; stEl = "status";
+};
+$("inCopy").onclick = async () => { try { await navigator.clipboard.writeText($("inMn").value.trim()); inStatus("Хууллаа ✓"); } catch { inStatus("Хуулж чадсангүй", true); } };
+$("reply").onclick = () => {
+  if (lastInLang){ S.lang = lastInLang; store.set("lang", lastInLang); seg("langs", LANGS, "lang"); }
+  S.mode = "speak"; store.set("mode", "speak"); renderModes();
+  $("mn").value = ""; $("out").classList.add("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  status(`Хариугаа монголоор яриарай — ${LANGS[S.lang].mn} хэл рүү орчуулна`);
+};
+
+// Share цэсээр ирсэн файл
+(async () => {
+  if (!new URLSearchParams(location.search).has("shared")) return;
+  history.replaceState(null, "", location.pathname);
+  S.mode = "in"; store.set("mode", "in"); renderModes();
+  try {
+    const c = await caches.open("shared-in");
+    const r = await c.match("shared-audio");
+    if (r) {
+      const b = await r.blob(); await c.delete("shared-audio");
+      const name = decodeURIComponent(r.headers.get("X-Name") || "voice");
+      handleIncoming(new File([b], name, { type: b.type })); return;
+    }
+    const rt = await c.match("shared-text");
+    if (rt) {
+      const t = (await rt.text()).trim(); await c.delete("shared-text");
+      $("inText").value = t; if (t) handleIncoming(t); return;
+    }
+    inStatus("Хуваалцсан зүйл олдсонгүй", true);
+  } catch (e) { inStatus(e.message, true); }
+})();
 
 // ---------- Particle дэвсгэр ----------
 (() => {
