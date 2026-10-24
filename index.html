@@ -180,10 +180,10 @@ body[data-mode="in"] .m-speak{display:none}
     <details id="settings">
       <summary><svg style="width:18px;height:18px"><use href="#i-gear"/></svg>Тохиргоо</summary>
       <div class="f">
-        <input id="key" type="password" placeholder="AIza..." autocomplete="off">
+        <input id="key" type="password" placeholder="Түлхүүр" autocomplete="off">
       </div>
       <button class="btn primary full f" id="save">Хадгалах</button>
-      <p class="small">Түлхүүр зөвхөн энэ утсан дээр хадгалагдана. Gemini-ийн моделийг апп өөрөө сонгоно.</p>
+      <p class="small">Түлхүүр зөвхөн энэ утсан дээр хадгалагдана.</p>
     </details>
   </div>
 </div>
@@ -258,10 +258,10 @@ async function geminiAuto(kind, body){
   const all = kind === "tts" ? TTS_MODELS : TEXT_MODELS;
   const first = all.find(x => x.m === good[kind] && !dead[x.m]);
   const list = [first, ...all.filter(x => x !== first && !dead[x.m])].filter(Boolean);
-  const el = $(stEl), base = el.textContent.replace(/ \[.*$/, ""), t0 = Date.now();
+  const el = $(stEl), base = el.textContent.replace(/ \(\d+ сек\)$/, ""), t0 = Date.now();
   const ctrls = [], errs = [];
   let next = 0, running = 0, done = false, current = "";
-  const tick = setInterval(() => { if (!done) el.textContent = `${base} [${current}, ${Math.round((Date.now() - t0) / 1000)} сек]`; }, 500);
+  const tick = setInterval(() => { if (!done) el.textContent = `${base} (${Math.round((Date.now() - t0) / 1000)} сек)`; }, 500);
   try {
     return await new Promise((resolve, reject) => {
       let hedge;
@@ -269,7 +269,7 @@ async function geminiAuto(kind, body){
       const launch = () => {
         clearTimeout(hedge);
         if (done) return;
-        if (next >= list.length) { if (!running) finish(reject, new Error("Бүх модель амжилтгүй:\n" + errs.join("\n"))); return; }
+        if (next >= list.length) { if (!running) finish(reject, friendly(errs)); return; }
         const mod = list[next++]; running++; current = mod.m.replace("gemini-", "");
         const ac = new AbortController(); ctrls.push(ac);
         gemini(mod, body, ac.signal).then(out => {
@@ -279,16 +279,25 @@ async function geminiAuto(kind, body){
           running--;
           if (done) return;
           errs.push(e.message);
-          if (/API key|API_KEY|PERMISSION_DENIED/i.test(e.message)) return finish(reject, e);
+          if (/API key|API_KEY|PERMISSION_DENIED/i.test(e.message)) return finish(reject, new Error("Түлхүүр буруу эсвэл хүчингүй байна. Тохиргоог шалгана уу."));
           if (e.permanent) dead[mod.m] = true;
           launch();
         });
         hedge = setTimeout(launch, HEDGE_MS[kind]);
       };
-      setTimeout(() => finish(reject, new Error(`${LIMIT_MS[kind] / 1000} секундэд хариу ирсэнгүй. Интернэтээ шалгаад дахин оролдоно уу.` + (errs.length ? "\n" + errs.join("\n") : ""))), LIMIT_MS[kind]);
+      setTimeout(() => finish(reject, new Error(`${LIMIT_MS[kind] / 1000} секундэд хариу ирсэнгүй. Интернэтээ шалгаад дахин оролдоно уу.`)), LIMIT_MS[kind]);
       launch();
     });
   } finally { clearInterval(tick); ctrls.forEach(c => c.abort()); }
+}
+
+// Хэрэглэгчид техникийн нэр харуулахгүй, ойлгомжтой мессеж өгнө
+function friendly(errs){
+  console.warn(errs.join("\n"));
+  const all = errs.join(" ");
+  if (/quota|RESOURCE_EXHAUSTED|429|rate/i.test(all)) return new Error("Хэрэглээний хязгаар түр дүүрсэн байна. Хэсэг хугацааны дараа дахин оролдоно уу.");
+  if (/Сүлжээний алдаа|Failed to fetch|NetworkError/i.test(all)) return new Error("Интернэт холболтоо шалгаад дахин оролдоно уу.");
+  return new Error("Үйлчилгээ түр ачаалалтай байна. Дахин оролдоно уу.");
 }
 
 async function gemini(mod, body, signal){
