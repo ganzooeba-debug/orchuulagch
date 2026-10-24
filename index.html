@@ -183,12 +183,8 @@ body[data-mode="in"] .m-speak{display:none}
         <label class="t">Gemini API түлхүүр · <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">энд авна</a></label>
         <input id="key" type="password" placeholder="AIza..." autocomplete="off">
       </div>
-      <div class="f row">
-        <div><label class="t">Текстийн модель</label><input id="mText"></div>
-        <div><label class="t">Хоолойн модель</label><input id="mTts"></div>
-      </div>
       <button class="btn primary full f" id="save">Хадгалах</button>
-      <p class="small">Түлхүүр зөвхөн энэ утсан дээр хадгалагдана. Модель ажиллахгүй бол апп өөрөө дараагийнх руу шилжинэ.</p>
+      <p class="small">Түлхүүр зөвхөн энэ утсан дээр хадгалагдана. Gemini-ийн моделийг апп өөрөө сонгоно.</p>
     </details>
   </div>
 </div>
@@ -231,11 +227,11 @@ function seg(boxId, items, field){
 }
 seg("langs", LANGS, "lang"); seg("styles", STYLES, "style"); seg("voices", VOICES, "voice");
 
-$("key").value = S.key; $("mText").value = S.mText; $("mTts").value = S.mTts;
+$("key").value = S.key;
 if (!S.key) $("settings").open = true;
 $("save").onclick = () => {
-  S.key = $("key").value.trim(); S.mText = $("mText").value.trim() || "gemini-3.8-flash"; S.mTts = $("mTts").value.trim() || "gemini-3.8-flash-tts";
-  store.set("key", S.key); store.set("mText", S.mText); store.set("mTts", S.mTts);
+  S.key = $("key").value.trim();
+  store.set("key", S.key);
   $("settings").open = false; status("Хадгаллаа ✓");
 };
 
@@ -245,15 +241,14 @@ function status(msg, err){ const s = $("status"); s.textContent = msg || ""; s.c
 let stEl = "status";
 const TEXT_MODELS = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
 const TTS_MODELS = ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts", "gemini-3.1-flash-tts-preview"];
-const good = {};
+const good = { text: store.get("goodText", ""), tts: store.get("goodTts", "") };
 async function geminiAuto(kind, body){
-  const pref = kind === "tts" ? S.mTts : S.mText;
-  const list = [...new Set([good[kind], pref, ...(kind === "tts" ? TTS_MODELS : TEXT_MODELS)].filter(Boolean))];
+  const list = [...new Set([good[kind], ...(kind === "tts" ? TTS_MODELS : TEXT_MODELS)].filter(Boolean))];
   const errs = [];
   for (const m of list){
     try {
       const out = await gemini(m, body);
-      good[kind] = m;
+      good[kind] = m; store.set(kind === "tts" ? "goodTts" : "goodText", m);
       return out;
     } catch (e) {
       errs.push(e.message);
