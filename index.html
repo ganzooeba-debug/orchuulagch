@@ -3,73 +3,73 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1020">
+<meta name="theme-color" content="#000000">
 <title>Дуу Орчуулагч</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
 <style>
 :root{
-  --bg:#0b1020;--card:rgba(255,255,255,.055);--card-line:rgba(255,255,255,.09);
-  --field:rgba(5,9,22,.55);--text:#eef1fb;--muted:#9aa3c0;
-  --a1:#22d3ee;--a2:#8b5cf6;--grad:linear-gradient(135deg,var(--a1),var(--a2));
-  --rec1:#fb7185;--rec2:#f43f5e;--err:#fda4af;--ok:#6ee7b7
+  --bg:#000;--card:rgba(6,6,8,.34);--card-line:rgba(255,255,255,.12);
+  --field:rgba(0,0,0,.6);--text:#f2f2f4;--muted:#8d8f98;
+  --glow:0 0 18px rgba(255,255,255,.35);--err:#ffb4b4
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{min-height:100%}
+html,body{min-height:100%;background:#000}
 body{margin:0;color:var(--text);font:16px/1.5 Manrope,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  background:
-    radial-gradient(600px 420px at 0% -5%,rgba(34,211,238,.20),transparent 60%),
-    radial-gradient(560px 420px at 100% 10%,rgba(139,92,246,.24),transparent 60%),
-    radial-gradient(500px 400px at 50% 110%,rgba(56,189,248,.10),transparent 60%),
-    var(--bg);
-  background-attachment:fixed;
-  padding:18px 16px calc(28px + env(safe-area-inset-bottom))}
-.wrap{max-width:540px;margin:0 auto}
-header{display:flex;align-items:center;gap:12px;margin:6px 2px 18px}
-.logo{width:44px;height:44px;border-radius:14px;background:var(--grad);display:grid;place-items:center;box-shadow:0 8px 24px rgba(139,92,246,.35)}
-.logo svg{width:24px;height:24px;color:#fff}
-h1{font-size:21px;font-weight:800;margin:0;letter-spacing:-.01em}
+  padding:18px 16px calc(28px + env(safe-area-inset-bottom));overflow-x:hidden}
+#bg{position:fixed;inset:0;width:100vw;height:100vh;z-index:0;pointer-events:none}
+.wrap{position:relative;z-index:1;max-width:540px;margin:0 auto}
+header{display:flex;align-items:center;gap:12px;margin:6px 2px 20px}
+.logo{width:44px;height:44px;border-radius:14px;background:#000;border:1px solid rgba(255,255,255,.25);display:grid;place-items:center;box-shadow:var(--glow)}
+.logo svg{width:26px;height:26px;color:#fff}
+h1{font-size:21px;font-weight:800;margin:0;letter-spacing:.01em;text-shadow:0 0 12px rgba(255,255,255,.35)}
 .sub{margin:0;font-size:13px;color:var(--muted)}
-.card{background:var(--card);border:1px solid var(--card-line);border-radius:22px;padding:16px;margin-bottom:14px;
-  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 10px 30px rgba(0,0,0,.25)}
-label.t{display:block;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 2px}
+.card{background:var(--card);border:1px solid var(--card-line);border-radius:22px;padding:16px;margin-bottom:14px}
+label.t{display:block;font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 8px 2px}
 .gap{margin-top:14px}
 textarea,input{width:100%;background:var(--field);color:var(--text);border:1px solid var(--card-line);border-radius:14px;padding:12px 14px;font:inherit;outline:none;transition:border-color .2s,box-shadow .2s}
-textarea:focus,input:focus{border-color:rgba(34,211,238,.6);box-shadow:0 0 0 3px rgba(34,211,238,.15)}
+textarea:focus,input:focus{border-color:rgba(255,255,255,.55);box-shadow:0 0 0 3px rgba(255,255,255,.08)}
 textarea{min-height:96px;resize:vertical}
-textarea::placeholder,input::placeholder{color:#6b7493}
+textarea::placeholder,input::placeholder{color:#5d5f68}
 .row{display:flex;gap:10px}.row>*{flex:1;min-width:0}
 .seg{display:flex;gap:4px;padding:4px;background:var(--field);border:1px solid var(--card-line);border-radius:14px}
 .seg button{flex:1;min-width:0;padding:10px 6px;border-radius:10px;background:transparent;color:var(--muted);font-weight:700}
-.seg button.on{background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(139,92,246,.35)}
-button{border:0;font:inherit;font-weight:700;cursor:pointer;color:var(--text);transition:transform .12s,opacity .2s,background .2s}
+.seg button.on{background:#fff;color:#000;box-shadow:var(--glow)}
+button{border:0;font:inherit;font-weight:700;cursor:pointer;color:var(--text);transition:transform .12s,opacity .2s,background .2s,box-shadow .2s}
 button:active{transform:scale(.97)}
-button:disabled{opacity:.5}
-.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 12px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid var(--card-line)}
+button:disabled{opacity:.45}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--card-line)}
 .btn svg{width:18px;height:18px;flex:none}
-.btn.primary{background:var(--grad);border:0;color:#fff;box-shadow:0 8px 22px rgba(139,92,246,.35)}
+.btn.primary{background:#fff;border:0;color:#000;box-shadow:var(--glow)}
 .btn.full{width:100%}
-.mic-zone{display:flex;flex-direction:column;align-items:center;padding:10px 0 4px}
-#mic{position:relative;width:128px;height:128px;border-radius:50%;background:var(--grad);display:grid;place-items:center;
-  box-shadow:0 0 0 10px rgba(139,92,246,.12),0 0 0 22px rgba(34,211,238,.06),0 16px 40px rgba(139,92,246,.45)}
-#mic svg{width:48px;height:48px;color:#fff}
+.mic-zone{display:flex;flex-direction:column;align-items:center;padding:14px 0 4px}
+#mic{position:relative;width:124px;height:124px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 50% 40%,#fff 0%,#e9e9ee 45%,#a9abb5 100%);
+  box-shadow:0 0 0 1px rgba(255,255,255,.35),0 0 30px rgba(255,255,255,.35),0 0 80px rgba(255,255,255,.15);
+  animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{50%{box-shadow:0 0 0 1px rgba(255,255,255,.45),0 0 42px rgba(255,255,255,.5),0 0 110px rgba(255,255,255,.2)}}
+#mic svg{width:46px;height:46px;color:#000}
 #mic .i-stop{display:none}
-#mic.rec{background:linear-gradient(135deg,var(--rec1),var(--rec2));box-shadow:0 16px 40px rgba(244,63,94,.45)}
-#mic.rec .i-mic{display:none}#mic.rec .i-stop{display:block}
-#mic.rec::before,#mic.rec::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(251,113,133,.6);animation:ring 1.6s ease-out infinite}
-#mic.rec::after{animation-delay:.8s}
-@keyframes ring{from{transform:scale(1);opacity:.9}to{transform:scale(1.6);opacity:0}}
+#mic.rec{animation:none;background:radial-gradient(circle at 50% 40%,#fff,#dcdce2 60%,#8d8f98)}
+#mic.rec .i-mic{display:none}#mic.rec .i-stop{display:block;color:#e11d48}
+#mic.rec::before,#mic.rec::after{content:"";position:absolute;inset:-2px;border-radius:50%;border:1.5px solid rgba(255,255,255,.7);animation:ring 1.8s ease-out infinite}
+#mic.rec::after{animation-delay:.9s}
+@keyframes ring{from{transform:scale(1);opacity:.9}to{transform:scale(1.75);opacity:0}}
 .hint{text-align:center;color:var(--muted);font-size:13px;margin:26px 0 0}
 #status{white-space:pre-wrap;min-height:20px;font-size:13.5px;color:var(--muted);text-align:center;margin:10px 0 14px}
-#status.err{color:var(--err);background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.25);border-radius:12px;padding:10px;text-align:left}
+#status.err{color:var(--err);background:rgba(255,80,80,.07);border:1px solid rgba(255,120,120,.25);border-radius:12px;padding:10px;text-align:left}
 #status:empty{margin:6px 0}
 .out-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.badge{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--grad);color:#fff}
-.back{font-size:14px;color:var(--muted);margin-top:10px;padding:10px 12px;border-left:3px solid var(--a1);background:rgba(34,211,238,.06);border-radius:0 10px 10px 0;white-space:pre-wrap}
+.badge{font-size:12px;font-weight:800;padding:4px 10px;border-radius:999px;background:#fff;color:#000;box-shadow:var(--glow)}
+.back{font-size:14px;color:#b9bbc4;margin-top:10px;padding:10px 12px;border-left:2px solid #fff;background:rgba(255,255,255,.04);border-radius:0 10px 10px 0;white-space:pre-wrap}
 .back:empty{display:none}
-audio{width:100%;margin:12px 0;height:44px}
+audio{width:100%;margin:12px 0;height:44px;filter:invert(1) grayscale(1) brightness(.9)}
 .actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .actions .wide{grid-column:1/-1}
 details summary{cursor:pointer;color:var(--muted);font-weight:700;list-style:none;display:flex;align-items:center;gap:8px}
@@ -77,12 +77,14 @@ details summary::-webkit-details-marker{display:none}
 details summary::after{content:"›";margin-left:auto;font-size:20px;transition:transform .2s}
 details[open] summary::after{transform:rotate(90deg)}
 details .f{margin-top:12px}
-a{color:var(--a1)}
+a{color:#fff}
 .small{font-size:12.5px;color:var(--muted);text-align:center;margin:10px 0 0}
 .hidden{display:none}
+@media (prefers-reduced-motion:reduce){#mic{animation:none}}
 </style>
 </head>
 <body>
+<canvas id="bg" aria-hidden="true"></canvas>
 <svg width="0" height="0" style="position:absolute">
   <symbol id="i-mic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 10a7 7 0 0 0 14 0M12 17v4M8 21h8"/></symbol>
   <symbol id="i-stop" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="3"/></symbol>
@@ -95,7 +97,7 @@ a{color:var(--a1)}
 </svg>
 <div class="wrap">
   <header>
-    <div class="logo"><svg><use href="#i-globe"/></svg></div>
+    <div class="logo"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="4" cy="12" r="1.2"/><circle cx="7" cy="9" r="1.2"/><circle cx="7" cy="15" r="1.2"/><circle cx="10" cy="6" r="1.2"/><circle cx="10" cy="12" r="1.2"/><circle cx="10" cy="18" r="1.2"/><circle cx="13" cy="8" r="1.2"/><circle cx="13" cy="16" r="1.2"/><circle cx="16" cy="10" r="1.2"/><circle cx="16" cy="14" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></div>
     <div><h1>Дуу Орчуулагч</h1><p class="sub">Монголоор ярь — хэлээр нь хүргэе</p></div>
   </header>
 
@@ -429,6 +431,56 @@ $("shareText").onclick = async () => {
 $("copy").onclick = async () => {
   try { await navigator.clipboard.writeText($("tr").value.trim()); status("Хууллаа ✓"); } catch { status("Хуулж чадсангүй", true); }
 };
+
+// ---------- Particle дэвсгэр ----------
+(() => {
+  const cv = $("bg"), g = cv.getContext("2d");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W, H, dpr, pts = [], stars = [];
+  function init(){
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr; g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    pts = []; stars = [];
+    const rows = 46, cols = Math.round(W / 6);
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++)
+      if (Math.random() < .7) pts.push({ r: r / rows, c: c / cols + (Math.random() - .5) / cols, j: Math.random() * 6.28, s: Math.random() });
+    for (let i = 0; i < 140; i++) stars.push({ x: Math.random() * W, y: Math.random() * H * .6, p: Math.random() * 6.28, z: Math.random() });
+  }
+  function frame(t){
+    t *= .00025;
+    g.fillStyle = "#000"; g.fillRect(0, 0, W, H);
+    for (const s of stars){
+      const a = .25 + .35 * Math.sin(t * 6 + s.p) * s.z;
+      g.fillStyle = `rgba(255,255,255,${Math.max(a, .05)})`;
+      g.fillRect(s.x, s.y, s.z > .85 ? 1.6 : 1, s.z > .85 ? 1.6 : 1);
+    }
+    const horizon = H * .48;
+    for (const p of pts){
+      const z = p.r;                       // 0 = хол, 1 = ойр
+      const persp = .25 + z * z * 1.2;
+      const x = W / 2 + (p.c - .5) * W * persp * 1.6;
+      if (x < -4 || x > W + 4) continue;
+      const wx = p.c * 6 + t * 2, wz = z * 5 - t * 3;
+      const hgt = Math.sin(wx) * .5 + Math.sin(wx * .6 + wz) * .7 + Math.sin(wz * 1.3 + 1) * .4;
+      const y = horizon + z * z * H * .55 - hgt * (14 + z * 60) + Math.sin(t * 8 + p.j) * .6;
+      const a = Math.min(1, (.22 + z * .95) * (.55 + p.s * .55));
+      const sz = z > .75 && p.s > .65 ? 1.9 : 1.2;
+      g.fillStyle = `rgba(255,255,255,${a})`;
+      g.fillRect(x, y, sz, sz);
+    }
+  }
+  let last = 0, raf;
+  function loop(ts){ raf = requestAnimationFrame(loop); if (ts - last < 33) return; last = ts; frame(ts); }
+  init(); addEventListener("resize", init);
+  if (reduce) frame(0); else raf = requestAnimationFrame(loop);
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) cancelAnimationFrame(raf); else if (!reduce) raf = requestAnimationFrame(loop);
+  });
+})();
+
+// ---------- PWA ----------
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
 </script>
 </body>
 </html>
