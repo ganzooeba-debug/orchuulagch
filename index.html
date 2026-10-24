@@ -238,47 +238,78 @@ function status(msg, err){ const s = $("status"); s.textContent = msg || ""; s.c
 
 // ---------- Gemini ----------
 let stEl = "status";
-const TEXT_MODELS = ["gemini-3.8-flash", "gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"];
-const TTS_MODELS = ["gemini-3.8-flash-tts", "gemini-3.8-flash-lite-tts", "gemini-3.1-flash-tts-preview"];
-const good = { text: store.get("goodText", ""), tts: store.get("goodTts", "") };
+// Хурдан моделиуд эхэнд. thinkingLevel бага байх тусам хурдан хариулна.
+const TEXT_MODELS = [
+  { m: "gemini-3.6-flash", think: "minimal" },
+  { m: "gemini-3.5-flash-lite", think: "minimal" },
+  { m: "gemini-3.8-flash", think: "low" },
+  { m: "gemini-3.7-flash", think: "low" },
+  { m: "gemini-3.1-flash-lite", think: "minimal" },
+  { m: "gemini-3.5-flash", think: "low" }
+];
+const TTS_MODELS = [{ m: "gemini-3.8-flash-lite-tts" }, { m: "gemini-3.8-flash-tts" }, { m: "gemini-3.1-flash-tts-preview" }];
+// Нэг модель удаашрахад дараагийнхыг зэрэг эхлүүлнэ (мс)
+const HEDGE_MS = { text: 4000, tts: 7000 }, LIMIT_MS = { text: 25000, tts: 35000 };
+const good = { text: store.get("goodText2", ""), tts: store.get("goodTts2", "") };
+const dead = {};
+
 async function geminiAuto(kind, body){
-  const list = [...new Set([good[kind], ...(kind === "tts" ? TTS_MODELS : TEXT_MODELS)].filter(Boolean))];
-  const errs = [];
-  for (const m of list){
-    try {
-      const out = await gemini(m, body);
-      good[kind] = m; store.set(kind === "tts" ? "goodTts" : "goodText", m);
-      return out;
-    } catch (e) {
-      errs.push(e.message);
-      if (/API key|API_KEY|PERMISSION_DENIED|Эхлээд Тохиргоо/i.test(e.message)) throw e;
-    }
-  }
-  throw new Error("Бүх модель амжилтгүй:\n" + errs.join("\n"));
+  if (!S.key) { $("settings").open = true; throw new Error("Эхлээд Тохиргоо дээр API түлхүүрээ оруулна уу"); }
+  const all = kind === "tts" ? TTS_MODELS : TEXT_MODELS;
+  const first = all.find(x => x.m === good[kind] && !dead[x.m]);
+  const list = [first, ...all.filter(x => x !== first && !dead[x.m])].filter(Boolean);
+  const el = $(stEl), base = el.textContent.replace(/ \[.*$/, ""), t0 = Date.now();
+  const ctrls = [], errs = [];
+  let next = 0, running = 0, done = false, current = "";
+  const tick = setInterval(() => { if (!done) el.textContent = `${base} [${current}, ${Math.round((Date.now() - t0) / 1000)} сек]`; }, 500);
+  try {
+    return await new Promise((resolve, reject) => {
+      let hedge;
+      const finish = (fn, v) => { if (!done) { done = true; clearTimeout(hedge); fn(v); } };
+      const launch = () => {
+        clearTimeout(hedge);
+        if (done) return;
+        if (next >= list.length) { if (!running) finish(reject, new Error("Бүх модель амжилтгүй:\n" + errs.join("\n"))); return; }
+        const mod = list[next++]; running++; current = mod.m.replace("gemini-", "");
+        const ac = new AbortController(); ctrls.push(ac);
+        gemini(mod, body, ac.signal).then(out => {
+          good[kind] = mod.m; store.set(kind === "tts" ? "goodTts2" : "goodText2", mod.m);
+          finish(resolve, out);
+        }, e => {
+          running--;
+          if (done) return;
+          errs.push(e.message);
+          if (/API key|API_KEY|PERMISSION_DENIED/i.test(e.message)) return finish(reject, e);
+          if (e.permanent) dead[mod.m] = true;
+          launch();
+        });
+        hedge = setTimeout(launch, HEDGE_MS[kind]);
+      };
+      setTimeout(() => finish(reject, new Error(`${LIMIT_MS[kind] / 1000} секундэд хариу ирсэнгүй. Интернэтээ шалгаад дахин оролдоно уу.` + (errs.length ? "\n" + errs.join("\n") : ""))), LIMIT_MS[kind]);
+      launch();
+    });
+  } finally { clearInterval(tick); ctrls.forEach(c => c.abort()); }
 }
 
-async function gemini(model, body){
-  if (!S.key) { $("settings").open = true; throw new Error("Эхлээд Тохиргоо дээр API түлхүүрээ оруулна уу"); }
-  const ac = new AbortController();
-  const base = $(stEl).textContent.replace(/ \[.*$/, "");
-  let sec = 0;
-  const tick = setInterval(() => { sec++; $(stEl).textContent = `${base} [${model}, ${sec} сек]`; }, 1000);
-  const to = setTimeout(() => ac.abort(), 40000);
+async function gemini(mod, body, signal){
+  let b = body;
+  if (mod.think && !mod.noThink) b = { ...body, generationConfig: { ...(body.generationConfig || {}), thinkingConfig: { thinkingLevel: mod.think } } };
   let r;
   try {
-    r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": S.key },
-      body: JSON.stringify(body),
-      signal: ac.signal
+    r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(mod.m)}:generateContent`, {
+      method: "POST", headers: { "Content-Type": "application/json", "x-goog-api-key": S.key }, body: JSON.stringify(b), signal
     });
-  } catch (e) {
-    throw new Error(e.name === "AbortError" ? `40 секунд хүлээгээд хариу ирсэнгүй (модель: ${model})` : "Сүлжээний алдаа: " + e.message);
-  } finally { clearInterval(tick); clearTimeout(to); }
+  } catch (e) { throw new Error(e.name === "AbortError" ? `[${mod.m}] зогсоосон` : "Сүлжээний алдаа: " + e.message); }
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(`[${model}] ` + ((j.error && j.error.message) || ("HTTP " + r.status)));
+  if (!r.ok) {
+    const msg = (j.error && j.error.message) || ("HTTP " + r.status);
+    if (r.status === 400 && /think/i.test(msg) && !mod.noThink) { mod.noThink = true; return gemini(mod, body, signal); }
+    const err = new Error(`[${mod.m}] ` + msg);
+    err.permanent = r.status === 404 || /no longer available|not found|not supported/i.test(msg);
+    throw err;
+  }
   const parts = j.candidates?.[0]?.content?.parts || [];
-  if (!parts.length) throw new Error("Хоосон хариу ирлээ");
+  if (!parts.length) throw new Error(`[${mod.m}] Хоосон хариу`);
   return parts;
 }
 const textOf = parts => parts.map(p => p.text || "").join("").trim();
